@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3a2f28">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>자평진전 뷰어</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ebe5d9;
+  --text: #2c2c2c;
+  --text2: #777;
+  --accent: #8b4513;
+  --accent2: #a0522d;
+  --border: #d4c5a9;
+  --header-bg: #3a2f28;
+  --header-text: #f0e8d8;
+  --popup-bg: #fffef8;
+  --shadow: rgba(0,0,0,0.15);
+  --panel-bg: #faf6ee;
+  --font-size: 18px;
+  --bottom-nav-h: 56px;
+  --header-h: 48px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+[data-theme="dark"] {
+  --bg: #1a1a2e;
+  --bg2: #16213e;
+  --text: #e0d8c8;
+  --text2: #8a8078;
+  --accent: #d4a574;
+  --accent2: #e8c39e;
+  --border: #3a3550;
+  --header-bg: #0f0f23;
+  --header-text: #d4c8b0;
+  --popup-bg: #252540;
+  --shadow: rgba(0,0,0,0.4);
+  --panel-bg: #1e1e38;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; }
+body {
+  font-family: 'Noto Serif KR', 'Batang', Georgia, serif;
+  background: var(--bg); color: var(--text);
+  font-size: var(--font-size); line-height: 1.85;
+  min-height: 100%; overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+  padding-top: calc(var(--header-h) + var(--safe-top));
+  padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom));
+}
+
+/* ═══ 상단 헤더 ═══ */
+#header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: calc(var(--header-h) + var(--safe-top));
+  padding-top: var(--safe-top);
+  background: var(--header-bg); color: var(--header-text);
+  display: flex; align-items: center; padding-left: 12px; padding-right: 12px;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+#header .title {
+  font-size: 16px; font-weight: bold; flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#header button {
+  background: none; border: none; color: var(--header-text);
+  font-size: 22px; padding: 8px; cursor: pointer; border-radius: 50%;
+  min-width: 40px; min-height: 40px;
+  display: flex; align-items: center; justify-content: center;
+}
+#header button:active { background: rgba(255,255,255,0.15); }
+
+/* ═══ 하단 내비게이션 바 ═══ */
+#bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  height: calc(var(--bottom-nav-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--header-bg);
+  display: flex; align-items: center; justify-content: space-around;
+  box-shadow: 0 -2px 6px var(--shadow);
+}
+.nav-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: none; border: none; color: rgba(240,232,216,0.6);
+  font-size: 10px; padding: 4px 0; cursor: pointer;
+  min-width: 56px; min-height: 48px; gap: 2px;
+  transition: color 0.2s;
+}
+.nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+.nav-btn.active { color: var(--accent2); }
+.nav-btn:active { color: #fff; }
+
+/* ═══ 본문 영역 ═══ */
+#content-area {
+  max-width: 800px; margin: 0 auto;
+  padding: 16px;
+  min-height: calc(100vh - var(--header-h) - var(--bottom-nav-h));
+}
+
+/* 환영 화면 */
+#welcome {
+  text-align: center; padding: 40px 8px;
+}
+#welcome h1 { font-size: 24px; color: var(--accent); margin-bottom: 12px; }
+#welcome p { font-size: 15px; color: var(--text2); margin-bottom: 6px; }
+#welcome .file-open-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 24px; padding: 14px 28px;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 12px; font-size: 16px; font-family: inherit;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(139,69,19,0.3);
+}
+#welcome .file-open-btn:active { transform: scale(0.97); }
+#welcome input[type="file"] { display: none; }
+#welcome .guide {
+  margin-top: 32px; text-align: left;
+  background: var(--bg2); padding: 16px 20px; border-radius: 10px;
+  border: 1px solid var(--border);
+}
+#welcome .guide h3 { font-size: 15px; color: var(--accent); margin-bottom: 8px; }
+#welcome .guide li { font-size: 13px; margin: 5px 0; list-style: disc inside; line-height: 1.6; }
+
+/* DOCX 본문 */
+#doc-body { display: none; }
+#doc-body p { margin-bottom: 10px; text-indent: 2em; }
+#doc-body h1, #doc-body h2, #doc-body h3 {
+  color: var(--accent); margin: 20px 0 10px; text-indent: 0;
+}
+
+/* ═══ 한자 스타일 ═══ */
+.hj {
+  color: var(--accent2); cursor: pointer;
+  border-bottom: 1px dotted rgba(139,69,19,0.3);
+  padding: 0 1px;
+}
+.hj:active { background: rgba(139,69,19,0.12); border-radius: 2px; }
+
+/* ═══ 바텀시트 (팝업) ═══ */
+#overlay {
+  position: fixed; inset: 0; z-index: 1500;
+  background: rgba(0,0,0,0.4);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+#overlay.show { opacity: 1; pointer-events: auto; }
+
+#bottom-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1600;
+  background: var(--popup-bg); color: var(--text);
+  border-radius: 16px 16px 0 0;
+  max-height: 70vh; overflow-y: auto;
+  padding: 0 20px 20px; padding-bottom: calc(20px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -4px 24px var(--shadow);
+}
+#bottom-sheet.show { transform: translateY(0); }
+#bottom-sheet .sheet-handle {
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 10px auto 16px;
+}
+.sheet-char { font-size: 48px; font-weight: bold; color: var(--accent); text-align: center; }
+.sheet-reading { font-size: 20px; text-align: center; margin-bottom: 8px; }
+.sheet-field { margin: 6px 0; font-size: 15px; }
+.sheet-field b { color: var(--accent2); }
+.sheet-myeongri {
+  margin-top: 10px; padding: 10px 12px;
+  background: rgba(139,69,19,0.06); border-radius: 8px;
+  border-left: 3px solid var(--accent);
+  font-size: 14px; line-height: 1.7;
+}
+[data-theme="dark"] .sheet-myeongri { background: rgba(212,165,116,0.08); }
+.sheet-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.sheet-term-title { font-size: 20px; font-weight: bold; color: var(--accent); }
+.sheet-term-reading { font-size: 14px; color: var(--text2); }
+.sheet-term-cat {
+  display: inline-block; font-size: 11px; padding: 2px 10px;
+  background: var(--accent); color: #fff; border-radius: 10px; margin: 4px 0;
+}
+.sheet-term-brief { font-weight: bold; margin: 6px 0; font-size: 16px; }
+.sheet-term-detail { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.sheet-related { margin-top: 8px; }
+.sheet-related span {
+  display: inline-block; background: var(--bg2); padding: 4px 10px;
+  border-radius: 6px; margin: 3px; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--border);
+}
+.sheet-related span:active { background: var(--accent); color: #fff; }
+
+/* ═══ 검색 패널 ═══ */
+#search-panel {
+  position: fixed; top: calc(var(--header-h) + var(--safe-top));
+  left: 0; right: 0; z-index: 1100;
+  background: var(--header-bg); padding: 8px 12px;
+  display: none; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+#search-panel.show { display: flex; }
+#search-panel input {
+  flex: 1; padding: 10px 14px; border: none;
+  border-radius: 8px; font-size: 15px; font-family: inherit;
+  background: rgba(255,255,255,0.12); color: var(--header-text);
+  outline: none;
+}
+#search-panel input::placeholder { color: rgba(255,255,255,0.4); }
+#search-panel .s-info { font-size: 12px; color: rgba(255,255,255,0.5); min-width: 50px; text-align: center; }
+#search-panel button {
+  background: none; border: none; color: var(--header-text);
+  font-size: 20px; padding: 6px; cursor: pointer; min-width: 36px; min-height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ═══ 풀스크린 패널 (참조표/설정/북마크) ═══ */
+.full-panel {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1200;
+  background: var(--panel-bg); color: var(--text);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding-top: calc(var(--safe-top));
+}
+.full-panel.show { transform: translateX(0); }
+.panel-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center;
+  padding: 0 8px; height: 48px;
+  background: var(--header-bg); color: var(--header-text);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.panel-header .panel-title { flex: 1; font-size: 16px; font-weight: bold; margin-left: 4px; }
+.panel-header button {
+  background: none; border: none; color: var(--header-text);
+  font-size: 24px; padding: 8px; cursor: pointer; min-width: 40px; min-height: 40px;
+  display: flex; align-items: center; justify-content: center;
+}
+.panel-body { padding: 16px; padding-bottom: calc(24px + var(--safe-bottom)); }
+
+/* 참조표 탭 */
+.ref-tabs {
+  display: flex; gap: 0; margin-bottom: 16px;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.ref-tab {
+  flex: 1; padding: 10px 4px; border: none; cursor: pointer;
+  font-size: 13px; font-family: inherit; font-weight: bold;
+  background: var(--bg2); color: var(--text);
+  transition: background 0.2s;
+}
+.ref-tab.active { background: var(--accent); color: #fff; }
+.ref-content { display: none; }
+.ref-content.active { display: block; }
+
+/* 참조표 테이블 */
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+.ref-table th {
+  background: var(--accent); color: #fff;
+  padding: 6px 4px; text-align: center; font-size: 12px;
+  position: sticky; top: 48px;
+}
+.ref-table td {
+  border: 1px solid var(--border); padding: 5px 4px;
+  text-align: center; font-size: 13px;
+}
+.ref-table tr:nth-child(even) td { background: var(--bg2); }
+.oh-wood { color: #2d8f2d; font-weight: bold; }
+.oh-fire { color: #d63031; font-weight: bold; }
+.oh-earth { color: #b8860b; font-weight: bold; }
+.oh-metal { color: #636e72; font-weight: bold; }
+.oh-water { color: #1565C0; font-weight: bold; }
+.ref-section-title {
+  font-size: 16px; font-weight: bold; color: var(--accent);
+  margin: 20px 0 8px; padding-bottom: 4px;
+  border-bottom: 2px solid var(--accent);
+}
+.ref-section-title:first-child { margin-top: 0; }
+
+/* 오행 다이어그램 */
+.oh-diagram { width: 100%; max-width: 300px; margin: 12px auto; }
+.oh-diagram svg { width: 100%; height: auto; }
+.oh-legend {
+  display: flex; justify-content: center; gap: 16px;
+  font-size: 13px; color: var(--text2); margin: 8px 0 16px;
+}
+
+/* 설정 항목 */
+.setting-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.setting-item .label { font-size: 15px; }
+.setting-item .desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.toggle {
+  position: relative; width: 50px; height: 28px;
+  background: var(--border); border-radius: 14px; cursor: pointer;
+  transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--accent); }
+.toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px; background: #fff;
+  border-radius: 50%; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { left: 25px; }
+.font-size-ctrl {
+  display: flex; align-items: center; gap: 12px;
+}
+.font-size-ctrl button {
+  width: 40px; height: 40px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg2); color: var(--text);
+  font-size: 18px; cursor: pointer; font-weight: bold;
+}
+.font-size-ctrl button:active { background: var(--accent); color: #fff; }
+.font-size-ctrl .size-val { font-size: 16px; min-width: 40px; text-align: center; }
+
+/* 북마크 목록 */
+.bm-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.bm-item:active { background: var(--bg2); }
+.bm-item .bm-text { flex: 1; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-item .bm-time { font-size: 11px; color: var(--text2); white-space: nowrap; }
+.bm-item .bm-del {
+  color: #c00; font-size: 20px; padding: 4px 8px;
+  background: none; border: none; cursor: pointer;
+}
+.bm-add-btn {
+  width: 100%; padding: 12px; margin-bottom: 12px;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; font-size: 15px; font-family: inherit;
+  cursor: pointer;
+}
+.bm-add-btn:active { opacity: 0.8; }
+
+/* 형광펜 */
+.hl-yellow { background: rgba(255,255,0,0.35); }
+.hl-green { background: rgba(0,255,100,0.25); }
+.hl-pink { background: rgba(255,100,150,0.3); }
+.hl-blue { background: rgba(100,180,255,0.3); }
+
+/* 형광펜 플로팅 메뉴 */
+#hl-menu {
+  position: fixed; z-index: 2100;
+  background: var(--popup-bg); border: 1px solid var(--border);
+  border-radius: 24px; padding: 6px 10px;
+  display: none; align-items: center; gap: 6px;
+  box-shadow: 0 4px 16px var(--shadow);
+}
+#hl-menu.show { display: flex; }
+#hl-menu button {
+  width: 36px; height: 36px; border: 2px solid var(--border);
+  border-radius: 50%; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+#hl-menu .hm-yellow { background: rgba(255,255,0,0.6); }
+#hl-menu .hm-green { background: rgba(0,255,100,0.4); }
+#hl-menu .hm-pink { background: rgba(255,100,150,0.5); }
+#hl-menu .hm-blue { background: rgba(100,180,255,0.5); }
+#hl-menu .hm-memo { background: var(--bg2); font-size: 12px; width: auto; padding: 0 12px; border-radius: 18px; }
+
+/* 검색 하이라이트 */
+.s-hl { background: #ffd700; color: #000; padding: 0 1px; border-radius: 2px; }
+.s-hl.cur { background: #ff6b00; color: #fff; }
+
+/* 메모 표시 */
+[data-note]::after { content: '📝'; font-size: 10px; vertical-align: super; }
+
+/* 로딩 */
+#loading {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+}
+#loading.show { display: flex; }
+.spinner {
+  width: 44px; height: 44px; border: 4px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 토스트 메시지 */
+#toast {
+  position: fixed; bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+  left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #333; color: #fff; padding: 10px 24px;
+  border-radius: 24px; font-size: 14px; z-index: 2500;
+  opacity: 0; transition: transform 0.3s, opacity 0.3s;
+  pointer-events: none; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ═══ 데스크톱 반응형 ═══ */
+@media (min-width: 769px) {
+  :root { --bottom-nav-h: 0px; }
+  body { padding-bottom: 0; }
+  #bottom-nav { display: none; }
+  #header {
+    padding-left: 20px; padding-right: 20px;
+  }
+  #header .desktop-btns { display: flex; gap: 4px; }
+  #header .desktop-btns button {
+    font-size: 13px; padding: 6px 14px; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+  }
+  #header .desktop-btns button:hover { background: rgba(255,255,255,0.1); }
+  #content-area { padding: 24px 32px; }
+  .full-panel { width: 420px; left: auto; }
+  #search-panel { left: auto; width: 420px; right: 0; border-radius: 0 0 0 12px; }
+  #bottom-sheet { max-width: 440px; left: auto; right: 20px; border-radius: 16px 16px 0 0; }
+}
+@media (max-width: 768px) {
+  #header .desktop-btns { display: none; }
+  #content-area { padding: 12px; }
+  #welcome h1 { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<header id="header">
+  <span class="title">자평진전 뷰어</span>
+  <div class="desktop-btns">
+    <button onclick="openFile()">파일 열기</button>
+    <button onclick="toggleSearch()">검색</button>
+    <button onclick="showPanel('ref')">참조표</button>
+    <button onclick="showPanel('bm')">북마크</button>
+    <button onclick="showPanel('settings')">설정</button>
+  </div>
+</header>
+
+<!-- 검색 패널 -->
+<div id="search-panel">
+  <input type="text" id="s-input" placeholder="검색어 입력..." autocomplete="off">
+  <span class="s-info" id="s-info"></span>
+  <button onclick="navSearch(-1)" title="이전">&#9650;</button>
+  <button onclick="navSearch(1)" title="다음">&#9660;</button>
+  <button onclick="toggleSearch()" title="닫기">&#10005;</button>
+</div>
+
+<!-- 본문 -->
+<main id="content-area">
+  <div id="welcome">
+    <h1>자평진전 뷰어</h1>
+    <p>명리학 고전 학습을 위한 한자 사전 뷰어</p>
+    <label class="file-open-btn">
+      &#128196; DOCX 파일 열기
+      <input type="file" id="file-input" accept=".docx">
+    </label>
+    <div class="guide">
+      <h3>사용법</h3>
+      <ul>
+        <li><b>한자 터치</b> - 음/뜻/명리학 의미 팝업</li>
+        <li><b>텍스트 선택</b> - 복합어 사전 / 형광펜</li>
+        <li><b>참조표</b> - 천간지지, 합충 관계, 오행도</li>
+        <li><b>북마크</b> - 현재 위치 저장 & 이동</li>
+        <li><b>설정</b> - 다크모드, 글자 크기 조절</li>
+      </ul>
+    </div>
+  </div>
+  <div id="doc-body"></div>
+</main>
+
+<!-- 하단 내비게이션 -->
+<nav id="bottom-nav">
+  <button class="nav-btn" onclick="openFile()"><span class="nav-icon">&#128196;</span>파일</button>
+  <button class="nav-btn" onclick="toggleSearch()"><span class="nav-icon">&#128269;</span>검색</button>
+  <button class="nav-btn" onclick="showPanel('ref')"><span class="nav-icon">&#128218;</span>참조표</button>
+  <button class="nav-btn" onclick="showPanel('bm')"><span class="nav-icon">&#9733;</span>북마크</button>
+  <button class="nav-btn" onclick="showPanel('settings')"><span class="nav-icon">&#9881;</span>설정</button>
+</nav>
+
+<!-- 바텀시트 (사전 팝업) -->
+<div id="overlay" onclick="closeSheet()"></div>
+<div id="bottom-sheet"><div class="sheet-handle"></div><div id="sheet-body"></div></div>
+
+<!-- 형광펜 메뉴 -->
+<div id="hl-menu">
+  <button class="hm-yellow" data-c="yellow"></button>
+  <button class="hm-green" data-c="green"></button>
+  <button class="hm-pink" data-c="pink"></button>
+  <button class="hm-blue" data-c="blue"></button>
+  <button class="hm-memo" data-c="memo">메모</button>
+</div>
+
+<!-- 참조표 패널 -->
+<div class="full-panel" id="panel-ref">
+  <div class="panel-header">
+    <button onclick="hidePanel('ref')">&#10005;</button>
+    <span class="panel-title">참조표</span>
+  </div>
+  <div class="panel-body">
+    <div class="ref-tabs">
+      <button class="ref-tab active" data-rt="rt-cg">천간지지</button>
+      <button class="ref-tab" data-rt="rt-hc">합충</button>
+      <button class="ref-tab" data-rt="rt-oh">오행</button>
+    </div>
+    <!-- 천간지지 -->
+    <div id="rt-cg" class="ref-content active">
+      <div class="ref-section-title">천간 (天干)</div>
+      <div style="overflow-x:auto">
+      <table class="ref-table">
+        <tr><th>천간</th><th>음</th><th>오행</th><th>음양</th><th>방위</th><th>계절</th></tr>
+        <tr><td style="font-size:20px">甲</td><td>갑</td><td class="oh-wood">木</td><td>양(+)</td><td>동</td><td>봄</td></tr>
+        <tr><td style="font-size:20px">乙</td><td>을</td><td class="oh-wood">木</td><td>음(-)</td><td>동</td><td>봄</td></tr>
+        <tr><td style="font-size:20px">丙</td><td>병</td><td class="oh-fire">火</td><td>양(+)</td><td>남</td><td>여름</td></tr>
+        <tr><td style="font-size:20px">丁</td><td>정</td><td class="oh-fire">火</td><td>음(-)</td><td>남</td><td>여름</td></tr>
+        <tr><td style="font-size:20px">戊</td><td>무</td><td class="oh-earth">土</td><td>양(+)</td><td>중앙</td><td>환절기</td></tr>
+        <tr><td style="font-size:20px">己</td><td>기</td><td class="oh-earth">土</td><td>음(-)</td><td>중앙</td><td>환절기</td></tr>
+        <tr><td style="font-size:20px">庚</td><td>경</td><td class="oh-metal">金</td><td>양(+)</td><td>서</td><td>가을</td></tr>
+        <tr><td style="font-size:20px">辛</td><td>신</td><td class="oh-metal">金</td><td>음(-)</td><td>서</td><td>가을</td></tr>
+        <tr><td style="font-size:20px">壬</td><td>임</td><td class="oh-water">水</td><td>양(+)</td><td>북</td><td>겨울</td></tr>
+        <tr><td style="font-size:20px">癸</td><td>계</td><td class="oh-water">水</td><td>음(-)</td><td>북</td><td>겨울</td></tr>
+      </table>
+      </div>
+      <div class="ref-section-title">지지 (地支)</div>
+      <div style="overflow-x:auto">
+      <table class="ref-table">
+        <tr><th>지지</th><th>음</th><th>오행</th><th>동물</th><th>시간</th><th>장간</th></tr>
+        <tr><td style="font-size:20px">子</td><td>자</td><td class="oh-water">水</td><td>쥐</td><td>23-01</td><td>癸</td></tr>
+        <tr><td style="font-size:20px">丑</td><td>축</td><td class="oh-earth">土</td><td>소</td><td>01-03</td><td>己癸辛</td></tr>
+        <tr><td style="font-size:20px">寅</td><td>인</td><td class="oh-wood">木</td><td>범</td><td>03-05</td><td>甲丙戊</td></tr>
+        <tr><td style="font-size:20px">卯</td><td>묘</td><td class="oh-wood">木</td><td>토끼</td><td>05-07</td><td>乙</td></tr>
+        <tr><td style="font-size:20px">辰</td><td>진</td><td class="oh-earth">土</td><td>용</td><td>07-09</td><td>戊乙癸</td></tr>
+        <tr><td style="font-size:20px">巳</td><td>사</td><td class="oh-fire">火</td><td>뱀</td><td>09-11</td><td>丙戊庚</td></tr>
+        <tr><td style="font-size:20px">午</td><td>오</td><td class="oh-fire">火</td><td>말</td><td>11-13</td><td>丁己</td></tr>
+        <tr><td style="font-size:20px">未</td><td>미</td><td class="oh-earth">土</td><td>양</td><td>13-15</td><td>己丁乙</td></tr>
+        <tr><td style="font-size:20px">申</td><td>신</td><td class="oh-metal">金</td><td>원숭이</td><td>15-17</td><td>庚壬戊</td></tr>
+        <tr><td style="font-size:20px">酉</td><td>유</td><td class="oh-metal">金</td><td>닭</td><td>17-19</td><td>辛</td></tr>
+        <tr><td style="font-size:20px">戌</td><td>술</td><td class="oh-earth">土</td><td>개</td><td>19-21</td><td>戊辛丁</td></tr>
+        <tr><td style="font-size:20px">亥</td><td>해</td><td class="oh-water">水</td><td>돼지</td><td>21-23</td><td>壬甲</td></tr>
+      </table>
+      </div>
+    </div>
+    <!-- 합충 -->
+    <div id="rt-hc" class="ref-content">
+      <div class="ref-section-title">천간합 (天干合)</div>
+      <table class="ref-table"><tr><th>합</th><th>화(化)</th><th>별칭</th></tr>
+      <tr><td>甲 + 己</td><td class="oh-earth">土</td><td>중정지합</td></tr>
+      <tr><td>乙 + 庚</td><td class="oh-metal">金</td><td>인의지합</td></tr>
+      <tr><td>丙 + 辛</td><td class="oh-water">水</td><td>위제지합</td></tr>
+      <tr><td>丁 + 壬</td><td class="oh-wood">木</td><td>인수지합</td></tr>
+      <tr><td>戊 + 癸</td><td class="oh-fire">火</td><td>무정지합</td></tr></table>
+
+      <div class="ref-section-title">지지 삼합 (三合)</div>
+      <table class="ref-table"><tr><th>삼합</th><th>화(化)</th></tr>
+      <tr><td>申 子 辰</td><td class="oh-water">水局</td></tr>
+      <tr><td>亥 卯 未</td><td class="oh-wood">木局</td></tr>
+      <tr><td>寅 午 戌</td><td class="oh-fire">火局</td></tr>
+      <tr><td>巳 酉 丑</td><td class="oh-metal">金局</td></tr></table>
+
+      <div class="ref-section-title">지지 육합 (六合)</div>
+      <table class="ref-table"><tr><th>합</th><th>화(化)</th></tr>
+      <tr><td>子 + 丑</td><td class="oh-earth">土</td></tr>
+      <tr><td>寅 + 亥</td><td class="oh-wood">木</td></tr>
+      <tr><td>卯 + 戌</td><td class="oh-fire">火</td></tr>
+      <tr><td>辰 + 酉</td><td class="oh-metal">金</td></tr>
+      <tr><td>巳 + 申</td><td class="oh-water">水</td></tr>
+      <tr><td>午 + 未</td><td>土/火</td></tr></table>
+
+      <div class="ref-section-title">지지 육충 (六沖)</div>
+      <table class="ref-table"><tr><th>충</th><th>관계</th></tr>
+      <tr><td>子 &#8596; 午</td><td>水 vs 火</td></tr>
+      <tr><td>丑 &#8596; 未</td><td>土 vs 土</td></tr>
+      <tr><td>寅 &#8596; 申</td><td>木 vs 金</td></tr>
+      <tr><td>卯 &#8596; 酉</td><td>木 vs 金</td></tr>
+      <tr><td>辰 &#8596; 戌</td><td>土 vs 土</td></tr>
+      <tr><td>巳 &#8596; 亥</td><td>火 vs 水</td></tr></table>
+
+      <div class="ref-section-title">지지 삼형 (三刑)</div>
+      <table class="ref-table"><tr><th>형</th><th>명칭</th></tr>
+      <tr><td>寅 巳 申</td><td>무은지형</td></tr>
+      <tr><td>丑 戌 未</td><td>지세지형</td></tr>
+      <tr><td>子 卯</td><td>무례지형</td></tr>
+      <tr><td>辰 午 酉 亥</td><td>자형</td></tr></table>
+
+      <div class="ref-section-title">방합 (方合)</div>
+      <table class="ref-table"><tr><th>방합</th><th>방위</th><th>결과</th></tr>
+      <tr><td>寅 卯 辰</td><td>동방</td><td class="oh-wood">木局</td></tr>
+      <tr><td>巳 午 未</td><td>남방</td><td class="oh-fire">火局</td></tr>
+      <tr><td>申 酉 戌</td><td>서방</td><td class="oh-metal">金局</td></tr>
+      <tr><td>亥 子 丑</td><td>북방</td><td class="oh-water">水局</td></tr></table>
+    </div>
+    <!-- 오행 -->
+    <div id="rt-oh" class="ref-content">
+      <div class="ref-section-title">오행 상생상극도</div>
+      <div class="oh-diagram">
+        <svg viewBox="0 0 300 300">
+          <defs>
+            <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#2d8f2d"/></marker>
+            <marker id="ar" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#c00"/></marker>
+          </defs>
+          <line x1="80" y1="230" x2="135" y2="65" stroke="#2d8f2d" stroke-width="2.5" marker-end="url(#ag)"/>
+          <line x1="165" y1="55" x2="235" y2="140" stroke="#2d8f2d" stroke-width="2.5" marker-end="url(#ag)"/>
+          <line x1="240" y1="170" x2="205" y2="250" stroke="#2d8f2d" stroke-width="2.5" marker-end="url(#ag)"/>
+          <line x1="185" y1="270" x2="110" y2="270" stroke="#2d8f2d" stroke-width="2.5" marker-end="url(#ag)"/>
+          <line x1="85" y1="255" x2="60" y2="180" stroke="#2d8f2d" stroke-width="2.5" marker-end="url(#ag)"/>
+          <line x1="70" y1="160" x2="225" y2="155" stroke="#c00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)" opacity="0.6"/>
+          <line x1="238" y1="165" x2="100" y2="262" stroke="#c00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)" opacity="0.6"/>
+          <line x1="92" y1="265" x2="145" y2="60" stroke="#c00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)" opacity="0.6"/>
+          <line x1="158" y1="52" x2="198" y2="255" stroke="#c00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)" opacity="0.6"/>
+          <line x1="200" y1="265" x2="68" y2="168" stroke="#c00" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)" opacity="0.6"/>
+          <circle cx="150" cy="42" r="28" fill="#d63031"/><text x="150" y="47" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">火</text>
+          <circle cx="245" cy="155" r="28" fill="#b8860b"/><text x="245" y="160" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">土</text>
+          <circle cx="200" cy="268" r="28" fill="#636e72"/><text x="200" y="273" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">金</text>
+          <circle cx="95" cy="268" r="28" fill="#1565C0"/><text x="95" y="273" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">水</text>
+          <circle cx="55" cy="155" r="28" fill="#2d8f2d"/><text x="55" y="160" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold">木</text>
+        </svg>
+      </div>
+      <div class="oh-legend">
+        <span><span style="color:#2d8f2d">&#x2500;&#x25B6;</span> 상생</span>
+        <span><span style="color:#c00">- - &#x25B6;</span> 상극</span>
+      </div>
+      <div class="ref-section-title">상생 (相生)</div>
+      <p style="text-align:center;font-size:15px;margin:8px 0">
+        <span class="oh-wood">木</span> &#x2192; <span class="oh-fire">火</span> &#x2192; <span class="oh-earth">土</span> &#x2192; <span class="oh-metal">金</span> &#x2192; <span class="oh-water">水</span> &#x2192; <span class="oh-wood">木</span>
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:12px">
+        木生火(나무는 불을 낳고) &bull; 火生土(불은 흙을 낳고)<br>
+        土生金(흙은 쇠를 낳고) &bull; 金生水(쇠는 물을 낳고)<br>
+        水生木(물은 나무를 낳는다)
+      </p>
+      <div class="ref-section-title">상극 (相剋)</div>
+      <p style="text-align:center;font-size:15px;margin:8px 0">
+        <span class="oh-wood">木</span> &#x2192; <span class="oh-earth">土</span> &#x2192; <span class="oh-water">水</span> &#x2192; <span class="oh-fire">火</span> &#x2192; <span class="oh-metal">金</span> &#x2192; <span class="oh-wood">木</span>
+      </p>
+      <div class="ref-section-title">오행 속성표</div>
+      <div style="overflow-x:auto">
+      <table class="ref-table">
+        <tr><th>오행</th><th>색</th><th>방위</th><th>계절</th><th>맛</th><th>장부</th><th>덕</th></tr>
+        <tr><td class="oh-wood">木</td><td>청</td><td>동</td><td>봄</td><td>신맛</td><td>간/담</td><td>인(仁)</td></tr>
+        <tr><td class="oh-fire">火</td><td>적</td><td>남</td><td>여름</td><td>쓴맛</td><td>심/소장</td><td>예(禮)</td></tr>
+        <tr><td class="oh-earth">土</td><td>황</td><td>중앙</td><td>환절기</td><td>단맛</td><td>비/위</td><td>신(信)</td></tr>
+        <tr><td class="oh-metal">金</td><td>백</td><td>서</td><td>가을</td><td>매운맛</td><td>폐/대장</td><td>의(義)</td></tr>
+        <tr><td class="oh-water">水</td><td>흑</td><td>북</td><td>겨울</td><td>짠맛</td><td>신/방광</td><td>지(智)</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 북마크 패널 -->
+<div class="full-panel" id="panel-bm">
+  <div class="panel-header">
+    <button onclick="hidePanel('bm')">&#10005;</button>
+    <span class="panel-title">북마크</span>
+  </div>
+  <div class="panel-body">
+    <button class="bm-add-btn" onclick="addBookmark()">+ 현재 위치 북마크 추가</button>
+    <div id="bm-list"></div>
+  </div>
+</div>
+
+<!-- 설정 패널 -->
+<div class="full-panel" id="panel-settings">
+  <div class="panel-header">
+    <button onclick="hidePanel('settings')">&#10005;</button>
+    <span class="panel-title">설정</span>
+  </div>
+  <div class="panel-body">
+    <div class="setting-item">
+      <div><div class="label">다크모드</div><div class="desc">어두운 배경으로 전환</div></div>
+      <div class="toggle" id="dark-toggle" onclick="toggleDark()"></div>
+    </div>
+    <div class="setting-item">
+      <div><div class="label">글자 크기</div><div class="desc" id="fs-desc">현재: 18px</div></div>
+      <div class="font-size-ctrl">
+        <button onclick="changeFont(-2)">A-</button>
+        <span class="size-val" id="fs-val">18</span>
+        <button onclick="changeFont(2)">A+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+<!-- 로딩 -->
+<div id="loading"><div class="spinner"></div></div>
+
+<!-- 외부 스크립트 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="hanja-dict.js"></script>
+<script src="myeongri-terms.js"></script>
+
+<script>
+(function(){
+'use strict';
+
+// ── DOM ──
+var $ = function(id){ return document.getElementById(id); };
+var docBody = $('doc-body');
+var welcome = $('welcome');
+var overlay = $('overlay');
+var sheet = $('bottom-sheet');
+var sheetBody = $('sheet-body');
+var hlMenu = $('hl-menu');
+var searchPanel = $('search-panel');
+var sInput = $('s-input');
+var sInfo = $('s-info');
+var fileInput = $('file-input');
+
+// ── 상태 ──
+var sMatches = [], sIdx = -1;
+var fontSize = parseInt(lsGet('jpjj-fs', 18));
+var isDark = lsGet('jpjj-dark', false);
+
+// ── 유틸 ──
+function isHanja(c) {
+  var code = c.charCodeAt(0);
+  return (code >= 0x4E00 && code <= 0x9FFF) || (code >= 0x3400 && code <= 0x4DBF) || (code >= 0xF900 && code <= 0xFAFF);
+}
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : d; } catch(e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function toast(msg) {
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+
+// ── 초기화 ──
+applyFont(fontSize);
+if (isDark) { document.documentElement.setAttribute('data-theme','dark'); $('dark-toggle').classList.add('on'); }
+
+// ── 파일 열기 ──
+window.openFile = function() { fileInput.click(); };
+fileInput.addEventListener('change', function(e) {
+  var file = e.target.files[0]; if (!file) return;
+  $('loading').classList.add('show');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    mammoth.convertToHtml({ arrayBuffer: ev.target.result })
+      .then(function(r) {
+        welcome.style.display = 'none';
+        docBody.style.display = 'block';
+        docBody.innerHTML = wrapHanja(r.value);
+        $('loading').classList.remove('show');
+        // 스크롤 복원
+        var sp = lsGet('jpjj-scroll', 0);
+        if (sp) setTimeout(function(){ window.scrollTo(0, sp); }, 100);
+        toast('파일 로드 완료');
+      })
+      .catch(function(err) {
+        $('loading').classList.remove('show');
+        alert('파일 오류: ' + err.message);
+      });
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function wrapHanja(html) {
+  var out = '', inTag = false;
+  for (var i = 0; i < html.length; i++) {
+    var c = html[i];
+    if (c === '<') { inTag = true; out += c; continue; }
+    if (c === '>') { inTag = false; out += c; continue; }
+    if (inTag) { out += c; continue; }
+    if (isHanja(c)) out += '<span class="hj">' + c + '</span>';
+    else out += c;
+  }
+  return out;
+}
+
+// ── 스크롤 위치 저장 ──
+var scrollTimer;
+window.addEventListener('scroll', function() {
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(function() { lsSet('jpjj-scroll', window.scrollY); }, 500);
+});
+
+// ── 한자 클릭 → 바텀시트 ──
+document.addEventListener('click', function(e) {
+  // 시트/메뉴 외부 클릭
+  if (!sheet.contains(e.target) && !e.target.classList.contains('hj')) closeSheet();
+  if (!hlMenu.contains(e.target)) hlMenu.classList.remove('show');
+
+  if (e.target.classList.contains('hj')) {
+    e.preventDefault(); e.stopPropagation();
+    showCharSheet(e.target.textContent);
+  }
+});
+
+function showCharSheet(ch) {
+  var info = (typeof HANJA_DICT !== 'undefined') ? HANJA_DICT[ch] : null;
+  var h = '<div class="sheet-char">' + ch + '</div>';
+  if (info) {
+    h += '<div class="sheet-reading">' + info.eumhun + '</div>';
+    h += '<div class="sheet-field"><b>뜻:</b> ' + info.meaning + '</div>';
+    h += '<div class="sheet-field"><b>부수:</b> ' + info.radical + ' &nbsp; <b>획수:</b> ' + info.strokes + '</div>';
+    if (info.myeongri) h += '<div class="sheet-myeongri"><b>명리학:</b> ' + info.myeongri + '</div>';
+    // 관련 용어
+    var related = findTermsFor(ch);
+    if (related.length) {
+      h += '<hr class="sheet-divider"><div style="font-size:13px;color:var(--accent);font-weight:bold;margin-bottom:6px">관련 명리학 용어</div>';
+      related.forEach(function(r) {
+        h += '<div class="sheet-related"><span onclick="showTermSheet(\'' + r.term + '\')">' + r.term + ' (' + r.data.reading + ') - ' + r.data.brief + '</span></div>';
+      });
+    }
+  } else {
+    h += '<div class="sheet-reading" style="color:var(--text2);">(사전에 미등록)</div>';
+  }
+  sheetBody.innerHTML = h;
+  openSheet();
+}
+
+function findTermsFor(ch) {
+  if (typeof MYEONGRI_TERMS === 'undefined') return [];
+  var res = [];
+  for (var term in MYEONGRI_TERMS) {
+    if (term.indexOf(ch) !== -1) res.push({ term: term, data: MYEONGRI_TERMS[term] });
+  }
+  return res.slice(0, 5);
+}
+
+window.showTermSheet = function(term) {
+  if (typeof MYEONGRI_TERMS === 'undefined' || !MYEONGRI_TERMS[term]) return;
+  var d = MYEONGRI_TERMS[term];
+  var h = '<div class="sheet-term-title">' + term + '</div>';
+  h += '<div class="sheet-term-reading">' + d.reading + '</div>';
+  h += '<span class="sheet-term-cat">' + d.category + '</span>';
+  h += '<div class="sheet-term-brief">' + d.brief + '</div>';
+  h += '<div class="sheet-term-detail">' + d.detail + '</div>';
+  if (d.related && d.related.length) {
+    h += '<div class="sheet-related" style="margin-top:10px">';
+    d.related.forEach(function(r) {
+      h += '<span onclick="showTermSheet(\'' + r + '\')">' + r + '</span>';
+    });
+    h += '</div>';
+  }
+  sheetBody.innerHTML = h;
+  openSheet();
+};
+
+// ── 텍스트 선택 → 복합어 / 형광펜 ──
+document.addEventListener('mouseup', handleSelection);
+document.addEventListener('touchend', function(e) { setTimeout(function(){ handleSelection(e); }, 100); });
+
+function handleSelection(e) {
+  if (sheet.contains(e.target) || hlMenu.contains(e.target)) return;
+  var sel = window.getSelection();
+  var text = sel.toString().trim();
+  if (!text || text.length < 1) return;
+  if (!docBody.contains(sel.anchorNode)) return;
+
+  // 복합어 검색 (2글자 이상)
+  if (text.length >= 2 && text.length <= 12 && typeof findMyeongriTerm === 'function') {
+    var terms = findMyeongriTerm(text);
+    if (terms.length > 0) {
+      var h = '';
+      terms.forEach(function(t, i) {
+        if (i > 0) h += '<hr class="sheet-divider">';
+        h += '<div class="sheet-term-title">' + t.term + '</div>';
+        h += '<div class="sheet-term-reading">' + t.data.reading + '</div>';
+        h += '<span class="sheet-term-cat">' + t.data.category + '</span>';
+        h += '<div class="sheet-term-brief">' + t.data.brief + '</div>';
+        h += '<div class="sheet-term-detail">' + t.data.detail + '</div>';
+        if (t.data.related && t.data.related.length) {
+          h += '<div class="sheet-related">';
+          t.data.related.forEach(function(r) {
+            h += '<span onclick="showTermSheet(\'' + r + '\')">' + r + '</span>';
+          });
+          h += '</div>';
+        }
+      });
+      sheetBody.innerHTML = h;
+      openSheet();
+      return;
+    }
+  }
+
+  // 형광펜 메뉴 표시
+  if (text.length >= 1) {
+    var rect = sel.getRangeAt(0).getBoundingClientRect();
+    var mx = rect.left + rect.width / 2 - 90;
+    var my = rect.top + window.scrollY - 50;
+    if (mx < 5) mx = 5;
+    if (my < 5) my = rect.bottom + window.scrollY + 8;
+    hlMenu.style.left = mx + 'px';
+    hlMenu.style.top = my + 'px';
+    hlMenu.classList.add('show');
+  }
+}
+
+// 형광펜 적용
+hlMenu.addEventListener('click', function(e) {
+  var btn = e.target.closest('button'); if (!btn) return;
+  var c = btn.dataset.c;
+  var sel = window.getSelection();
+  if (!sel.rangeCount) return;
+
+  if (c === 'memo') {
+    var note = prompt('메모를 입력하세요:');
+    if (note !== null) applyHL(sel, 'yellow', note);
+  } else if (c) {
+    applyHL(sel, c);
+  }
+  hlMenu.classList.remove('show');
+});
+
+function applyHL(sel, color, note) {
+  var range = sel.getRangeAt(0);
+  if (range.collapsed) return;
+  var span = document.createElement('span');
+  span.className = 'hl-' + color;
+  if (note) { span.dataset.note = note; span.title = note; }
+  try { range.surroundContents(span); } catch(e) {
+    var frag = range.extractContents();
+    span.appendChild(frag);
+    range.insertNode(span);
+  }
+  sel.removeAllRanges();
+  toast(note ? '메모가 추가되었습니다' : '형광펜이 적용되었습니다');
+}
+
+// ── 바텀시트 열기/닫기 ──
+function openSheet() { overlay.classList.add('show'); sheet.classList.add('show'); }
+function closeSheet() { overlay.classList.remove('show'); sheet.classList.remove('show'); }
+window.closeSheet = closeSheet;
+
+// 터치로 바텀시트 드래그하여 닫기
+var sheetStartY = 0;
+sheet.addEventListener('touchstart', function(e) {
+  sheetStartY = e.touches[0].clientY;
+});
+sheet.addEventListener('touchmove', function(e) {
+  var dy = e.touches[0].clientY - sheetStartY;
+  if (dy > 0 && sheet.scrollTop <= 0) {
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+    e.preventDefault();
+  }
+}, { passive: false });
+sheet.addEventListener('touchend', function(e) {
+  var dy = e.changedTouches[0].clientY - sheetStartY;
+  sheet.style.transform = '';
+  if (dy > 80) closeSheet();
+});
+
+// ── 검색 ──
+window.toggleSearch = function() {
+  var isOpen = searchPanel.classList.toggle('show');
+  if (isOpen) { sInput.focus(); }
+  else { clearSearch(); }
+};
+
+sInput.addEventListener('input', doSearch);
+sInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') navSearch(e.shiftKey ? -1 : 1);
+  if (e.key === 'Escape') toggleSearch();
+});
+
+function doSearch() {
+  clearSearchHL();
+  var q = sInput.value.trim();
+  if (!q) { sInfo.textContent = ''; sMatches = []; sIdx = -1; return; }
+  var walker = document.createTreeWalker(docBody, NodeFilter.SHOW_TEXT);
+  sMatches = [];
+  var nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(function(node) {
+    var text = node.textContent;
+    var idx = text.indexOf(q);
+    if (idx === -1) return;
+    var frag = document.createDocumentFragment();
+    var last = 0;
+    while (idx !== -1) {
+      if (idx > last) frag.appendChild(document.createTextNode(text.substring(last, idx)));
+      var mark = document.createElement('mark');
+      mark.className = 's-hl';
+      mark.textContent = text.substring(idx, idx + q.length);
+      frag.appendChild(mark);
+      sMatches.push(mark);
+      last = idx + q.length;
+      idx = text.indexOf(q, last);
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.substring(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
+  sInfo.textContent = sMatches.length ? sMatches.length + '건' : '없음';
+  sIdx = -1;
+  if (sMatches.length) navSearch(1);
+}
+
+window.navSearch = function(dir) {
+  if (!sMatches.length) return;
+  if (sIdx >= 0 && sMatches[sIdx]) sMatches[sIdx].classList.remove('cur');
+  sIdx += dir;
+  if (sIdx >= sMatches.length) sIdx = 0;
+  if (sIdx < 0) sIdx = sMatches.length - 1;
+  sMatches[sIdx].classList.add('cur');
+  sMatches[sIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  sInfo.textContent = (sIdx + 1) + '/' + sMatches.length;
+};
+
+function clearSearchHL() {
+  docBody.querySelectorAll('mark.s-hl').forEach(function(m) {
+    var p = m.parentNode;
+    while (m.firstChild) p.insertBefore(m.firstChild, m);
+    p.removeChild(m);
+    p.normalize();
+  });
+  sMatches = []; sIdx = -1;
+}
+function clearSearch() { sInput.value = ''; clearSearchHL(); sInfo.textContent = ''; }
+
+// ── 패널 (참조표/북마크/설정) ──
+window.showPanel = function(name) {
+  $('panel-' + name).classList.add('show');
+  if (name === 'bm') renderBookmarks();
+};
+window.hidePanel = function(name) {
+  $('panel-' + name).classList.remove('show');
+};
+
+// 참조표 탭 전환
+document.querySelectorAll('.ref-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.ref-tab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.ref-content').forEach(function(c){ c.classList.remove('active'); });
+    btn.classList.add('active');
+    $(btn.dataset.rt).classList.add('active');
+  });
+});
+
+// ── 북마크 ──
+window.addBookmark = function() {
+  var pos = window.scrollY;
+  var el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+  var text = el ? (el.textContent || '').substring(0, 40) : '';
+  var bms = lsGet('jpjj-bm', []);
+  bms.push({ id: Date.now(), pos: pos, text: text, time: new Date().toLocaleString('ko-KR') });
+  lsSet('jpjj-bm', bms);
+  renderBookmarks();
+  toast('북마크가 저장되었습니다');
+};
+
+function renderBookmarks() {
+  var list = $('bm-list');
+  var bms = lsGet('jpjj-bm', []);
+  if (!bms.length) { list.innerHTML = '<p style="font-size:14px;color:var(--text2);text-align:center;padding:20px">저장된 북마크가 없습니다.</p>'; return; }
+  list.innerHTML = bms.map(function(b) {
+    return '<div class="bm-item" data-pos="' + b.pos + '">' +
+      '<span class="bm-text">' + (b.text || '(위치 정보 없음)') + '</span>' +
+      '<span class="bm-time">' + b.time + '</span>' +
+      '<button class="bm-del" data-id="' + b.id + '">&times;</button></div>';
+  }).join('');
+}
+
+$('bm-list').addEventListener('click', function(e) {
+  var del = e.target.closest('.bm-del');
+  if (del) {
+    var id = parseInt(del.dataset.id);
+    var bms = lsGet('jpjj-bm', []).filter(function(b){ return b.id !== id; });
+    lsSet('jpjj-bm', bms);
+    renderBookmarks();
+    toast('북마크가 삭제되었습니다');
+    return;
+  }
+  var item = e.target.closest('.bm-item');
+  if (item) {
+    window.scrollTo({ top: parseInt(item.dataset.pos), behavior: 'smooth' });
+    hidePanel('bm');
+  }
+});
+
+// ── 설정: 다크모드 ──
+window.toggleDark = function() {
+  isDark = !isDark;
+  $('dark-toggle').classList.toggle('on', isDark);
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  lsSet('jpjj-dark', isDark);
+};
+
+// ── 설정: 글자 크기 ──
+window.changeFont = function(d) {
+  fontSize = Math.max(14, Math.min(28, fontSize + d));
+  applyFont(fontSize);
+  lsSet('jpjj-fs', fontSize);
+};
+function applyFont(sz) {
+  document.documentElement.style.setProperty('--font-size', sz + 'px');
+  var v = $('fs-val'); if (v) v.textContent = sz;
+  var desc = $('fs-desc'); if (desc) desc.textContent = '현재: ' + sz + 'px';
+}
+
+// ── 키보드 단축키 ──
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); toggleSearch(); }
+  if (e.key === 'Escape') {
+    closeSheet(); hlMenu.classList.remove('show');
+    if (searchPanel.classList.contains('show')) toggleSearch();
+    hidePanel('ref'); hidePanel('bm'); hidePanel('settings');
+  }
+});
+
+// ── 뒤로가기 처리 (모바일) ──
+window.addEventListener('popstate', function() {
+  if (sheet.classList.contains('show')) { closeSheet(); return; }
+  var panels = document.querySelectorAll('.full-panel.show');
+  if (panels.length) { panels.forEach(function(p){ p.classList.remove('show'); }); return; }
+});
+
+})();
+</script>
+</body>
+</html>
