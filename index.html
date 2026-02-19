@@ -452,10 +452,14 @@ body {
   <div id="welcome">
     <h1>자평진전 뷰어</h1>
     <p>명리학 고전 학습을 위한 한자 사전 뷰어</p>
-    <label class="file-open-btn">
-      &#128196; DOCX 파일 열기
-      <input type="file" id="file-input" accept=".docx">
-    </label>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;max-width:320px;margin-left:auto;margin-right:auto">
+      <button class="file-open-btn" onclick="loadServerFile('자평진전.docx')">&#128214; 자평진전 읽기</button>
+      <button class="file-open-btn" onclick="loadServerFile('子平学记자평진전.docx')" style="background:var(--accent2)">&#128218; 子平学记 자평진전 읽기</button>
+      <label class="file-open-btn" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);box-shadow:none;font-size:14px;padding:10px 20px;justify-content:center">
+        &#128196; 다른 DOCX 파일 열기
+        <input type="file" id="file-input" accept=".docx">
+      </label>
+    </div>
     <div class="guide">
       <h3>사용법</h3>
       <ul>
@@ -731,6 +735,40 @@ applyFont(fontSize);
 if (isDark) { document.documentElement.setAttribute('data-theme','dark'); $('dark-toggle').classList.add('on'); }
 
 // ── 파일 열기 ──
+// 서버에 있는 DOCX 파일 로드
+window.loadServerFile = function(filename) {
+  $('loading').classList.add('show');
+  fetch(filename)
+    .then(function(res) {
+      if (!res.ok) throw new Error('파일을 찾을 수 없습니다: ' + filename);
+      return res.arrayBuffer();
+    })
+    .then(function(buf) {
+      var title = filename.replace('.docx', '');
+      document.querySelector('#header .title').textContent = title;
+      mammoth.convertToHtml({ arrayBuffer: buf })
+        .then(function(r) {
+          welcome.style.display = 'none';
+          docBody.style.display = 'block';
+          docBody.innerHTML = wrapHanja(r.value);
+          $('loading').classList.remove('show');
+          var sp = lsGet('jpjj-scroll-' + filename, 0);
+          if (sp) setTimeout(function(){ window.scrollTo(0, sp); }, 100);
+          toast(title + ' 로드 완료');
+          // 현재 파일명 저장
+          window._currentFile = filename;
+        })
+        .catch(function(err) {
+          $('loading').classList.remove('show');
+          alert('변환 오류: ' + err.message);
+        });
+    })
+    .catch(function(err) {
+      $('loading').classList.remove('show');
+      alert(err.message);
+    });
+};
+
 window.openFile = function() { fileInput.click(); };
 fileInput.addEventListener('change', function(e) {
   var file = e.target.files[0]; if (!file) return;
